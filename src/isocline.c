@@ -73,6 +73,12 @@ ic_public char* ic_readline(const char* prompt_text)
       }
       term_write(env->term, env->prompt_marker);
       term_end_raw(env->term, false);
+    } else {
+      if (prompt_text != NULL) {
+        fputs(prompt_text, stdout);
+      }
+      fputs(env->prompt_marker, stdout);
+      fflush(stdout);
     }
     // read directly from stdin
     return ic_getline(env->mem);
