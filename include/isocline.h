@@ -319,6 +319,25 @@ char* ic_readline_ex(const char* prompt_text, ic_completer_fun_t* completer, voi
 /// \defgroup options Options
 /// \{
 
+/// Set a handler function for control key combinations like Ctrl-C and Ctrl-D. These
+/// key combinations are not always distinguishable from other situations that cause
+/// `ic_readline` to return NULL or empty strings, such as errors and EOF. The calling
+/// application may need to know that such a key combination was used. With a control
+/// key handler installed, `ic_readline` will call the handler before returning when
+/// applicable. The handler function should return void and accept two arguments: the
+/// first being the `void * state` passed to `ic_set_ctrl_handler` and the second
+/// being the `uint32_t` key (0x03, 0x04, 0x26, etc.) that followed the Ctrl in the key
+/// combination that caused `ic_readline` to return. If you do not need state, simply
+/// pass `NULL` to this argument.
+void ic_set_ctrl_handler(void * state, void (*handler)( void *, uint32_t ));
+
+/// Disable or enable signal handlers.
+/// By default, isocline installs various signal handlers to intercept signals the
+/// application receives. This might not be appropriate in all applications (especially
+/// if your application already installs its own signal handlers). In these cases, you
+/// can disable signal handlers.
+void ic_enable_signal_handlers( bool enable );
+
 /// Set a prompt marker and a potential marker for extra lines with multiline input.
 /// Pass \a NULL for the `prompt_marker` for the default marker (`"> "`).
 /// Pass \a NULL for continuation prompt marker to make it equal to the `prompt_marker`.

@@ -40,6 +40,11 @@ ic_private bool   tty_term_resize_event(tty_t* tty); // did the terminal resize?
 ic_private bool   tty_async_stop(const tty_t* tty);  // unblock the read asynchronously
 ic_private void   tty_set_esc_delay(tty_t* tty, long initial_delay_ms, long followup_delay_ms);
 
+ic_private void   tty_set_ctrl_handler(tty_t* tty, void * state, void (*handler)( void *, uint32_t ));
+ic_private void   tty_invoke_ctrl_handler(tty_t* tty, uint32_t key);
+
+ic_private void   tty_enable_signal_handlers(tty_t* tty, bool enable);
+
 // shared between tty.c and tty_esc.c: low level character push
 ic_private void   tty_cpush_char(tty_t* tty, uint8_t c);
 ic_private bool   tty_cpop(tty_t* tty, uint8_t* c);

@@ -156,6 +156,18 @@ ic_public bool ic_async_stop(void) {
   return tty_async_stop(env->tty);
 }
 
+ic_public void ic_set_ctrl_handler(void * state, void (*handler)( void *, uint32_t )) {
+  ic_env_t* env = ic_get_env();
+  if (env == NULL) return;
+  tty_set_ctrl_handler(env->tty, state, handler);
+}
+
+ic_public void ic_enable_signal_handlers(bool enable) {
+  ic_env_t* env = ic_get_env();
+  if (env == NULL) return;
+  tty_enable_signal_handlers(env->tty, enable);
+}
+
 static void set_prompt_marker(ic_env_t* env, const char* prompt_marker, const char* cprompt_marker) {
   if (prompt_marker == NULL) prompt_marker = "> ";
   if (cprompt_marker == NULL) cprompt_marker = prompt_marker;

@@ -935,10 +935,14 @@ static char* edit_line( ic_env_t* env, const char* prompt_text )
       }
     } 
     else if (c == KEY_CTRL_D) {
-      if (eb.pos == 0 && editor_pos_is_at_end(&eb)) break; // ctrl+D on empty quits with NULL
+      if (eb.pos == 0 && editor_pos_is_at_end(&eb)) {
+        tty_invoke_ctrl_handler(env->tty, c);
+        break; // ctrl+D on empty quits with NULL
+      }
       edit_delete_char(env,&eb);     // otherwise it is like delete
     } 
     else if (c == KEY_EVENT_STOP) {
+      tty_invoke_ctrl_handler(env->tty, c);
       break; // STOP event quits with NULL
     }
     else if (c == KEY_ESC) {
@@ -947,6 +951,7 @@ static char* edit_line( ic_env_t* env, const char* prompt_text )
       // edit_delete_line(env,&eb);  // otherwise delete the current line
     }
     else if (c == KEY_BELL /* ^G */ || c == KEY_CTRL_C) {
+      tty_invoke_ctrl_handler(env->tty, c);
       edit_delete_all(env,&eb);
       break; // ctrl+G or ctrl+c cancels (and returns empty input)
     }

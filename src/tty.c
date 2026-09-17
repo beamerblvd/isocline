@@ -55,6 +55,9 @@ struct tty_s {
   struct termios  orig_ios;         // original terminal settings
   struct termios  raw_ios;          // raw terminal settings
   #endif
+  void    (*ctrl_handler)( void *, uint32_t ); // Ctrl combination key handler
+  void *    ctrl_handler_state;                // whatever state object, if any, provided when registering the Ctrl handler
+  bool      enable_signal_handlers;            // whether signal handlers are enabled
 };
 
 
@@ -407,6 +410,7 @@ ic_private tty_t* tty_new(alloc_t* mem, int fd_in)
     tty_free(tty);
     return NULL;
   }
+  tty->enable_signal_handlers = true;
   return tty;
 }
 
@@ -438,6 +442,23 @@ ic_private void tty_set_esc_delay(tty_t* tty, long initial_delay_ms, long follow
 
 ic_private bool tty_is_atty(int fd) {
   return (isatty(fd) != 0);
+}
+
+ic_private void tty_set_ctrl_handler(tty_t* tty, void * state, void (*handler)( void *, uint32_t )) {
+  if (tty == NULL) return;
+  tty->ctrl_handler_state = state;
+  tty->ctrl_handler = handler;
+}
+
+ic_private void tty_invoke_ctrl_handler(tty_t* tty, uint32_t key) {
+  if (tty == NULL) return;
+  if (tty->ctrl_handler == NULL) return;
+  tty->ctrl_handler(tty->ctrl_handler_state, key);
+}
+
+ic_private void tty_enable_signal_handlers(tty_t* tty, bool enable) {
+  if (tty == NULL) return;
+  tty->enable_signal_handlers = enable;
 }
 
 //-------------------------------------------------------------
@@ -607,6 +628,7 @@ static void sig_handler(int signum, siginfo_t* siginfo, void* uap ) {
 }
 
 static void signals_install(tty_t* tty) {
+  if (!tty->enable_signal_handlers) return;
   sig_tty = tty;
   // generic signal handler
   struct sigaction handler;
@@ -630,6 +652,7 @@ static void signals_install(tty_t* tty) {
 }
 
 static void signals_restore(void) {
+  if (!tty->enable_signal_handlers) return;
   // restore all signal handlers
   for( signal_handler_t* sh = sighandlers; sh->signum != 0; sh++ ) {
     if (sigaction_is_valid(&sh->action.previous)) {
