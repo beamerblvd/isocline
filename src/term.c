@@ -1034,7 +1034,7 @@ static void term_update_ansi16(term_t* term) {
   if (tty_start_raw(term->tty)) {
     for(int i = 0; i < 16; i++) {
       uint32_t color;
-      if (!term_esc_query_color_raw(term, i, &color)) break;
+      if (!term_esc_query_color_raw(term, (int)i, &color)) break;
       debug_msg("term ansi color %d: 0x%06x\n", i, color);
       ansi256[i] = color;
     }
